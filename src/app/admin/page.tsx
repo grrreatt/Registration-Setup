@@ -65,8 +65,8 @@ export default function AdminPage() {
 
       // Calculate stats
       const today = new Date().toISOString().split('T')[0]
-      const todayCheckIns = checkInsData?.filter(ci => 
-        ci.checked_in_at.startsWith(today)
+      const todayCheckIns = (checkInsData as CheckIn[] | undefined)?.filter((ci: CheckIn) => 
+        ci.checked_in_at?.startsWith(today)
       ).length || 0
 
       setStats({
