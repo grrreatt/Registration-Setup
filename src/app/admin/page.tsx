@@ -8,8 +8,15 @@ import { toast } from 'sonner'
 import { formatDateTime, formatDate } from '@/lib/utils'
 import { Attendee, Event, CheckIn } from '@/types'
 
+type AttendeeWithEvent = Attendee & {
+  events?: {
+    event_name: string
+    event_date: string
+  } | null
+}
+
 export default function AdminPage() {
-  const [attendees, setAttendees] = useState<Attendee[]>([])
+  const [attendees, setAttendees] = useState<AttendeeWithEvent[]>([])
   const [events, setEvents] = useState<Event[]>([])
   const [checkIns, setCheckIns] = useState<CheckIn[]>([])
   const [isLoading, setIsLoading] = useState(true)
