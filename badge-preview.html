@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Badge Preview - QR Check-In System</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .preview-container {
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      text-align: center;
+      max-width: 600px;
+    }
+
+    .preview-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #2c3e50;
+      margin-bottom: 10px;
+    }
+
+    .preview-subtitle {
+      color: #7f8c8d;
+      font-size: 16px;
+      margin-bottom: 30px;
+    }
+
+    .badge-preview {
+      width: 105mm;
+      height: 148mm;
+      padding: 0;
+      border: none;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      position: relative;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      margin: 20px auto;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .badge-header {
+      background: rgba(255,255,255,0.95);
+      padding: 15px 20px;
+      text-align: center;
+      position: relative;
+    }
+
+    .event-title {
+      font-size: 16pt;
+      font-weight: 800;
+      color: #2c3e50;
+      margin: 0;
+      letter-spacing: 0.5px;
+    }
+
+    .event-subtitle {
+      font-size: 11pt;
+      color: #7f8c8d;
+      margin: 5px 0 0 0;
+      font-weight: 500;
+    }
+
+    .badge-content {
+      padding: 25px 20px;
+      background: white;
+      height: calc(100% - 80px);
+      position: relative;
+    }
+
+    .name {
+      font-size: 20pt;
+      font-weight: 700;
+      color: #2c3e50;
+      margin: 0 0 15px 0;
+      line-height: 1.2;
+      text-align: left;
+    }
+
+    .category-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #e74c3c, #c0392b);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 11pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 15px;
+      box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
+    }
+
+    .category-badge.faculty {
+      background: linear-gradient(135deg, #3498db, #2980b9);
+      box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+    }
+
+    .category-badge.exhibitor {
+      background: linear-gradient(135deg, #f39c12, #e67e22);
+      box-shadow: 0 4px 8px rgba(243, 156, 18, 0.3);
+    }
+
+    .category-badge.staff {
+      background: linear-gradient(135deg, #9b59b6, #8e44ad);
+      box-shadow: 0 4px 8px rgba(155, 89, 182, 0.3);
+    }
+
+    .category-badge.chairperson {
+      background: linear-gradient(135deg, #1abc9c, #16a085);
+      box-shadow: 0 4px 8px rgba(26, 188, 156, 0.3);
+    }
+
+    .institution {
+      font-size: 12pt;
+      color: #34495e;
+      margin: 0 0 20px 0;
+      text-align: left;
+      font-weight: 500;
+    }
+
+    .qr-section {
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      text-align: center;
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 10px;
+      border: 2px solid #e9ecef;
+    }
+
+    .qr-code {
+      width: 70px;
+      height: 70px;
+      background: #333;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 8px;
+      margin-bottom: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    .qr-label {
+      font-size: 9pt;
+      color: #6c757d;
+      font-weight: 600;
+    }
+
+    .badge-info {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      right: 120px;
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 10px;
+      border: 1px solid #e9ecef;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 8px 0;
+      font-size: 10pt;
+      color: #495057;
+    }
+
+    .info-label {
+      font-weight: 600;
+      color: #6c757d;
+    }
+
+    .info-value {
+      font-weight: 500;
+    }
+
+    .uid-section {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 11pt;
+      font-weight: 700;
+      text-align: center;
+      box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+    }
+
+    .preview-controls {
+      margin-top: 40px;
+      text-align: center;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      margin: 0 8px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn.print {
+      background: linear-gradient(135deg, #27ae60, #2ecc71);
+      box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+    }
+
+    .btn.print:hover {
+      box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
+    }
+
+    .dimensions {
+      font-size: 13px;
+      color: #6c757d;
+      margin-top: 25px;
+      line-height: 1.6;
+    }
+
+    @media print {
+      body {
+        background: white;
+        padding: 0;
+      }
+      .preview-container {
+        box-shadow: none;
+        padding: 0;
+      }
+      .preview-controls, .dimensions, .preview-title, .preview-subtitle {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="preview-container">
+    <div class="preview-title">🎫 Professional Badge Design</div>
+    <div class="preview-subtitle">Modern, clean, and visually appealing event badges</div>
+    
+    <div class="badge-preview">
+      <div class="badge-header">
+        <div class="event-title">MEDICAL CONFERENCE 2025</div>
+        <div class="event-subtitle">Annual Healthcare Summit</div>
+      </div>
+      
+      <div class="badge-content">
+        <div class="name">Dr. Aarav Sharma</div>
+        <div class="category-badge" id="categoryBadge">Delegate</div>
+        <div class="institution">AIIMS New Delhi</div>
+        
+        <div class="qr-section">
+          <div class="qr-code">QR<br>CODE</div>
+          <div class="qr-label" id="qrLabel">MED0001</div>
+        </div>
+        
+        <div class="badge-info">
+          <div class="info-row">
+            <span class="info-label">Meal:</span>
+            <span class="info-value" id="mealInfo">✓ Entitled</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Kit:</span>
+            <span class="info-value" id="kitInfo">✓ Entitled</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Template:</span>
+            <span class="info-value">TPL_A6_V1</span>
+          </div>
+        </div>
+        
+        <div class="uid-section" id="uidSection">
+          ID: MED0001
+        </div>
+      </div>
+    </div>
+    
+    <div class="preview-controls">
+      <button class="btn" onclick="changeBadge('delegate')">👥 Delegate</button>
+      <button class="btn" onclick="changeBadge('faculty')">👨‍🏫 Faculty</button>
+      <button class="btn" onclick="changeBadge('exhibitor')">🏢 Exhibitor</button>
+      <button class="btn" onclick="changeBadge('staff')">👨‍💼 Staff</button>
+      <button class="btn" onclick="changeBadge('chairperson')">🎤 Chairperson</button>
+      <button class="btn print" onclick="window.print()">🖨️ Print Preview</button>
+    </div>
+    
+    <div class="dimensions">
+      <strong>🎨 Design Features:</strong><br>
+      • Modern gradient background with professional color scheme<br>
+      • Clean typography with proper visual hierarchy<br>
+      • Color-coded category badges for easy identification<br>
+      • Optimized spacing and layout for maximum readability<br>
+      • Professional QR code placement with clear labeling<br>
+      • Size: A6 (105mm × 148mm) - Perfect for lanyards
+    </div>
+  </div>
+
+  <script>
+    const badgeData = {
+      delegate: {
+        name: 'Dr. Aarav Sharma',
+        category: 'Delegate',
+        institution: 'AIIMS New Delhi',
+        uid: 'MED0001',
+        meal: '✓ Entitled',
+        kit: '✓ Entitled',
+        color: 'delegate'
+      },
+      faculty: {
+        name: 'Dr. Ananya Gupta',
+        category: 'Faculty',
+        institution: 'Safdarjung Hospital',
+        uid: 'MED0002',
+        meal: '✓ Entitled',
+        kit: '✓ Entitled',
+        color: 'faculty'
+      },
+      exhibitor: {
+        name: 'Dr. Arjun Patel',
+        category: 'Exhibitor',
+        institution: 'Max Super Specialty Hospital',
+        uid: 'MED0005',
+        meal: '✗ Not Entitled',
+        kit: '✗ Not Entitled',
+        color: 'exhibitor'
+      },
+      staff: {
+        name: 'Dr. Ishaan Bansal',
+        category: 'Staff',
+        institution: 'Conference Operations',
+        uid: 'MED0009',
+        meal: '✓ Entitled',
+        kit: '✓ Entitled',
+        color: 'staff'
+      },
+      chairperson: {
+        name: 'Dr. Advika Nair',
+        category: 'Chairperson',
+        institution: 'LNJP Hospital',
+        uid: 'MED0004',
+        meal: '✓ Entitled',
+        kit: '✓ Entitled',
+        color: 'chairperson'
+      }
+    };
+
+    function changeBadge(type) {
+      const data = badgeData[type];
+      document.querySelector('.name').textContent = data.name;
+      document.querySelector('#categoryBadge').textContent = data.category;
+      document.querySelector('.institution').textContent = data.institution;
+      document.querySelector('#uidSection').textContent = `ID: ${data.uid}`;
+      document.querySelector('#qrLabel').textContent = data.uid;
+      document.querySelector('#mealInfo').textContent = data.meal;
+      document.querySelector('#kitInfo').textContent = data.kit;
+      
+      // Update category badge color
+      const categoryBadge = document.querySelector('#categoryBadge');
+      categoryBadge.className = `category-badge ${data.color}`;
+    }
+  </script>
+</body>
+</html>

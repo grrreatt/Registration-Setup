@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Printer Setup (QZ Tray)</title>
+  <style>
+    body { font-family: system-ui, Segoe UI, Roboto, Arial; background:#0b1020; color:#e5e7eb; margin:0; padding:20px; }
+    .card { background:#0b1220; border:1px solid #121a2b; border-radius:12px; padding:16px; max-width:800px; margin:0 auto; }
+    .row { display:flex; gap:12px; flex-wrap:wrap; }
+    select, button, input { appearance:none; border:1px solid #1f2a44; background:#0c1528; color:#cbd5e1; padding:10px 12px; border-radius:10px; }
+    button { cursor:pointer; }
+    .muted { color:#94a3b8; font-size:13px; }
+    .ok { color:#22c55e; }
+    .bad { color:#ef4444; }
+    textarea { width:100%; height:200px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Printer Setup (QZ Tray)</h2>
+    <ol>
+      <li>Install QZ Tray from <a href="https://qz.io/download/" target="_blank">qz.io/download</a> and run it.</li>
+      <li>Approve the security prompt when the page requests access.</li>
+      <li>Select your Zebra (or thermal) printer and test a ZPL print.</li>
+    </ol>
+    <div class="row" style="margin:12px 0">
+      <button id="btnConnect">Connect</button>
+      <button id="btnList">List Printers</button>
+      <select id="printerSelect"></select>
+      <button id="btnTest">Test Print</button>
+      <span id="status" class="muted"></span>
+    </div>
+    <div class="muted">If connection fails, ensure QZ Tray is running (tray icon) and reload this page.</div>
+    <div style="margin-top:12px" class="muted">ZPL Preview</div>
+    <textarea id="zplPreview" readonly></textarea>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qz-tray/2.1.0/qz-tray.js"></script>
+  <script src="/printer/zpl-templates.js"></script>
+  <script>
+    const statusEl = document.getElementById('status');
+    const printerSelect = document.getElementById('printerSelect');
+    const preview = document.getElementById('zplPreview');
+
+    function setStatus(msg, good){ statusEl.textContent = msg; statusEl.className = good ? 'ok' : 'bad'; }
+
+    async function connect(){
+      try{ await qz.websocket.connect(); setStatus('Connected to QZ Tray', true); }
+      catch(e){ setStatus('Connect failed: '+e, false); }
+    }
+
+    async function listPrinters(){
+      try{
+        const list = await qz.printers.find();
+        printerSelect.innerHTML = '';
+        list.forEach(name => {
+          const opt = document.createElement('option');
+          opt.value = opt.textContent = name; printerSelect.appendChild(opt);
+        });
+        setStatus(`Found ${list.length} printers`, true);
+      } catch(e){ setStatus('List failed: '+e, false); }
+    }
+
+    async function testPrint(){
+      const name = printerSelect.value || '';
+      if(!name){ setStatus('Select a printer', false); return; }
+      const zpl = ZplTemplates.generateZplA6({
+        full_name: 'Test Badge',
+        category: 'DELEGATE',
+        institution: 'AOGD',
+        badge_uid: 'TEST1234'
+      });
+      preview.value = zpl;
+      const cfg = qz.configs.create(name, { rasterize: false, encoding: 'utf8' });
+      try{ await qz.print(cfg, [{ type: 'raw', format: 'command', data: zpl }]); setStatus('Test sent ✓', true); }
+      catch(e){ setStatus('Print failed: '+e, false); }
+    }
+
+    document.getElementById('btnConnect').addEventListener('click', connect);
+    document.getElementById('btnList').addEventListener('click', listPrinters);
+    document.getElementById('btnTest').addEventListener('click', testPrint);
+  </script>
+</body>
+</html>
+
+
+

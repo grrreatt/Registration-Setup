@@ -1,0 +1,111 @@
+<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+  xmlns:o="urn:schemas-microsoft-com:office:office"
+  xmlns:x="urn:schemas-microsoft-com:office:excel"
+  xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+  xmlns:html="http://www.w3.org/TR/REC-html40">
+  <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
+    <Author>System</Author>
+    <LastAuthor>System</LastAuthor>
+    <Created>2025-08-09T00:00:00Z</Created>
+    <Company>Conference</Company>
+    <Version>16.00</Version>
+  </DocumentProperties>
+  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
+    <WindowHeight>9000</WindowHeight>
+    <WindowWidth>18000</WindowWidth>
+    <ProtectStructure>False</ProtectStructure>
+    <ProtectWindows>False</ProtectWindows>
+  </ExcelWorkbook>
+  <Styles>
+    <Style ss:ID="Default" ss:Name="Normal">
+      <Alignment ss:Vertical="Bottom"/>
+      <Borders/>
+      <Font/>
+      <Interior/>
+      <NumberFormat/>
+      <Protection/>
+    </Style>
+    <Style ss:ID="sHeader">
+      <Font ss:Bold="1"/>
+      <Interior ss:Color="#E6F2FF" ss:Pattern="Solid"/>
+    </Style>
+  </Styles>
+
+  <Worksheet ss:Name="Master">
+    <Table ss:ExpandedColumnCount="11" ss:ExpandedRowCount="100" x:FullColumns="1" x:FullRows="1">
+      <Row ss:AutoFitHeight="0">
+        <Cell ss:StyleID="sHeader"><Data ss:Type="String">event_code</Data></Cell>
+        <Cell ss:StyleID="sHeader"><Data ss:Type="String">badge_uid</Data></Cell>
+        <Cell ss:StyleID="sHeader"><Data ss:Type="String">full_name</Data></Cell>
+        <Cell ss:StyleID="sHeader"><Data ss:Type="String">email</Data></Cell>
+        <Cell ss:StyleID="sHeader"><Data ss:Type="String">category</Data></Cell>
+        <Cell ss:StyleID="sHeader"><Data ss:Type="String">meal_entitled(yes/no)</Data></Cell>
+        <Cell ss:StyleID="sHeader"><Data ss:Type="String">kit_entitled(yes/no)</Data></Cell>
+        <Cell ss:StyleID="sHeader"><Data ss:Type="String">institution</Data></Cell>
+        <Cell ss:StyleID="sHeader"><Data ss:Type="String">phone</Data></Cell>
+        <Cell ss:StyleID="sHeader"><Data ss:Type="String">badge_print_template</Data></Cell>
+        <Cell ss:StyleID="sHeader"><Data ss:Type="String">notes</Data></Cell>
+      </Row>
+      <!-- Data rows go below (start at row 2) -->
+    </Table>
+    <DataValidations xmlns="urn:schemas-microsoft-com:office:excel">
+      <!-- category uses Lists!A2:A1000 -->
+      <DataValidation Type="List" CellRange="R2C5:R65536" Value="=Lists!R2C1:R1000C1"/>
+      <!-- meal_entitled yes/no uses Lists!B2:B3 -->
+      <DataValidation Type="List" CellRange="R2C6:R65536" Value="=Lists!R2C2:R3C2"/>
+      <!-- kit_entitled yes/no uses Lists!B2:B3 -->
+      <DataValidation Type="List" CellRange="R2C7:R65536" Value="=Lists!R2C2:R3C2"/>
+      
+    </DataValidations>
+    <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+      <Selected/>
+      <Panes>
+        <Pane>
+          <Number>3</Number>
+          <ActiveRow>1</ActiveRow>
+          <ActiveCol>1</ActiveCol>
+        </Pane>
+      </Panes>
+      <ProtectObjects>False</ProtectObjects>
+      <ProtectScenarios>False</ProtectScenarios>
+    </WorksheetOptions>
+  </Worksheet>
+
+  <Worksheet ss:Name="Lists">
+    <Table ss:ExpandedColumnCount="2" ss:ExpandedRowCount="100" x:FullColumns="1" x:FullRows="1">
+      <Row>
+        <Cell><Data ss:Type="String">Category</Data></Cell>
+        <Cell><Data ss:Type="String">YesNo</Data></Cell>
+      </Row>
+      <Row>
+        <Cell><Data ss:Type="String">delegate</Data></Cell>
+        <Cell><Data ss:Type="String">yes</Data></Cell>
+      </Row>
+      <Row>
+        <Cell><Data ss:Type="String">faculty</Data></Cell>
+        <Cell><Data ss:Type="String">no</Data></Cell>
+      </Row>
+      <Row>
+        <Cell><Data ss:Type="String">exhibitor</Data></Cell>
+        <Cell/>
+      </Row>
+      <Row>
+        <Cell><Data ss:Type="String">staff</Data></Cell>
+        <Cell/>
+      </Row>
+      <Row>
+        <Cell><Data ss:Type="String">chairperson</Data></Cell>
+        <Cell/>
+      </Row>
+    </Table>
+    <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+      <ProtectObjects>False</ProtectObjects>
+      <ProtectScenarios>False</ProtectScenarios>
+    </WorksheetOptions>
+  </Worksheet>
+
+</Workbook>
+
+

@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR Check-In System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --card: #ffffff;
+      --card-hover: #f8f9fa;
+      --accent: #1a73e8;
+      --accent-hover: #1557b0;
+      --success: #34a853;
+      --error: #ea4335;
+      --warning: #fbbc04;
+      --muted: #5f6368;
+      --text: #202124;
+      --text-secondary: #5f6368;
+      --border: #dadce0;
+      --border-hover: #bdc1c6;
+      --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding: 20px 0;
+    }
+
+    .logo {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 8px;
+      letter-spacing: -0.025em;
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 16px;
+      font-weight: 400;
+    }
+
+    .search-container {
+      max-width: 600px;
+      margin: 0 auto 40px;
+      position: relative;
+    }
+
+    .search-box {
+      width: 100%;
+      padding: 20px 24px;
+      font-size: 18px;
+      border: 2px solid var(--border);
+      border-radius: 24px;
+      background: var(--card);
+      color: var(--text);
+      outline: none;
+      transition: all 0.2s ease;
+      box-shadow: var(--shadow);
+      font-family: 'Inter', sans-serif;
+      font-weight: 400;
+    }
+
+    .search-box:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+    }
+
+    .search-box::placeholder {
+      color: var(--text-secondary);
+    }
+
+    .search-icon {
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-secondary);
+      font-size: 20px;
+    }
+
+    .manual-entry {
+      max-width: 600px;
+      margin: 0 auto 40px;
+    }
+
+    .manual-input {
+      width: 100%;
+      padding: 16px 20px;
+      font-size: 16px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      background: var(--card);
+      color: var(--text);
+      outline: none;
+      transition: all 0.2s ease;
+      font-family: 'Inter', sans-serif;
+      font-weight: 400;
+    }
+
+    .manual-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+    }
+
+    .manual-input::placeholder {
+      color: var(--text-secondary);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      box-shadow: var(--shadow);
+      transition: all 0.2s ease;
+    }
+
+    .stat-card:hover {
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-2px);
+    }
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 8px;
+      line-height: 1;
+    }
+
+    .stat-label {
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .result-card {
+      max-width: 600px;
+      margin: 0 auto 40px;
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: var(--shadow-lg);
+      transition: all 0.3s ease;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    .result-card.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .result-card.success {
+      border-color: var(--success);
+      box-shadow: 0 0 0 3px rgba(52, 168, 83, 0.1);
+    }
+
+    .result-card.error {
+      border-color: var(--error);
+      box-shadow: 0 0 0 3px rgba(234, 67, 53, 0.1);
+    }
+
+    .result-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .result-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 16px;
+      font-size: 24px;
+    }
+
+    .result-icon.success {
+      background: rgba(52, 168, 83, 0.1);
+      color: var(--success);
+    }
+
+    .result-icon.error {
+      background: rgba(234, 67, 53, 0.1);
+      color: var(--error);
+    }
+
+    .result-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .result-subtitle {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .result-field {
+      background: var(--card-hover);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .result-label {
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+
+    .result-value {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .status-badge.entitled {
+      background: rgba(52, 168, 83, 0.1);
+      color: var(--success);
+    }
+
+    .status-badge.checked-in {
+      background: rgba(26, 115, 232, 0.1);
+      color: var(--accent);
+    }
+
+    .status-badge.not-entitled {
+      background: rgba(234, 67, 53, 0.1);
+      color: var(--error);
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .btn-secondary {
+      background: var(--card);
+      color: var(--text);
+      border: 2px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--card-hover);
+      border-color: var(--border-hover);
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: #2d8f47;
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .btn-danger {
+      background: var(--error);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #d93025;
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .recent-activity {
+      max-width: 600px;
+      margin: 0 auto;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .recent-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 16px;
+    }
+
+    .recent-list {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .recent-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+
+    .recent-item:last-child {
+      border-bottom: none;
+    }
+
+    .recent-item:hover {
+      background: var(--card-hover);
+      margin: 0 -12px;
+      padding: 12px;
+      border-radius: 8px;
+    }
+
+    .recent-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .recent-name {
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .recent-details {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .recent-time {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border);
+      border-radius: 50%;
+      border-top-color: var(--accent);
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 16px 24px;
+      border-radius: 8px;
+      color: white;
+      font-weight: 600;
+      z-index: 1000;
+      box-shadow: var(--shadow-xl);
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+      max-width: 400px;
+    }
+
+    .notification.show {
+      transform: translateX(0);
+    }
+
+    .notification.success {
+      background: var(--success);
+    }
+
+    .notification.error {
+      background: var(--error);
+    }
+
+    .notification.info {
+      background: var(--accent);
+    }
+
+    .offline-indicator {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: var(--warning);
+      color: white;
+      text-align: center;
+      padding: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      z-index: 1001;
+      transform: translateY(-100%);
+      transition: transform 0.3s ease;
+    }
+
+    .offline-indicator.show {
+      transform: translateY(0);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .fade-in {
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .success-animation {
+      animation: successPulse 0.6s ease-in-out;
+    }
+
+    @keyframes successPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+      100% { transform: scale(1); }
+    }
+
+    .error-animation {
+      animation: errorShake 0.6s ease-in-out;
+    }
+
+    @keyframes errorShake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 16px;
+      }
+      
+      .search-box {
+        font-size: 16px;
+        padding: 16px 20px;
+      }
+      
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+      }
+      
+      .result-card {
+        padding: 24px;
+      }
+      
+      .action-buttons {
+        flex-direction: column;
+      }
+      
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="offline-indicator" id="offlineIndicator">
+    📡 You're offline - using cached data
+  </div>
+
+  <div class="container">
+    <div class="header">
+      <div class="logo">QR Check-In System</div>
+      <div class="subtitle">Fast, reliable check-in for your event</div>
+    </div>
+
+    <div class="search-container">
+      <input type="text" id="qrScanner" class="search-box" 
+             placeholder="🔍 Point QR scanner here or type badge code manually" 
+             autocomplete="off" spellcheck="false" />
+      <div class="search-icon">📱</div>
+    </div>
+
+    <div class="manual-entry">
+      <input type="text" id="manualEntry" class="manual-input" 
+             placeholder="Or type badge code manually (e.g., MED0001)" 
+             autocomplete="off" spellcheck="false" />
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value" id="totalAttendees">0</div>
+        <div class="stat-label">Total Attendees</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="kitEntitled">0</div>
+        <div class="stat-label">Kit Entitled</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="kitCheckedIn">0</div>
+        <div class="stat-label">Kit Checked In</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="mealEntitled">0</div>
+        <div class="stat-label">Meal Entitled</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="mealCheckedIn">0</div>
+        <div class="stat-label">Meal Checked In</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="remaining">0</div>
+        <div class="stat-label">Remaining</div>
+      </div>
+    </div>
+
+    <div id="resultCard" class="result-card hidden">
+      <div class="result-header">
+        <div class="result-icon" id="resultIcon">✅</div>
+        <div>
+          <div class="result-title" id="resultTitle">Attendee Found</div>
+          <div class="result-subtitle" id="resultSubtitle">Ready for check-in</div>
+        </div>
+      </div>
+
+      <div class="result-grid">
+        <div class="result-field">
+          <div class="result-label">Full Name</div>
+          <div class="result-value" id="attendeeName"></div>
+        </div>
+        <div class="result-field">
+          <div class="result-label">Badge Code</div>
+          <div class="result-value" id="badgeCode"></div>
+        </div>
+        <div class="result-field">
+          <div class="result-label">Category</div>
+          <div class="result-value" id="category"></div>
+        </div>
+        <div class="result-field">
+          <div class="result-label">Institution</div>
+          <div class="result-value" id="institution"></div>
+        </div>
+        <div class="result-field">
+          <div class="result-label">Kit Status</div>
+          <div class="result-value" id="kitStatus"></div>
+        </div>
+        <div class="result-field">
+          <div class="result-label">Meal Status</div>
+          <div class="result-value" id="mealStatus"></div>
+        </div>
+      </div>
+
+      <div class="action-buttons">
+        <button id="btnKitCheckIn" class="btn btn-success">
+          <span id="kitBtnIcon">🎒</span>
+          <span id="kitBtnText">Check-In Kit</span>
+        </button>
+        <button id="btnMealCheckIn" class="btn btn-primary">
+          <span id="mealBtnIcon">🍽️</span>
+          <span id="mealBtnText">Check-In Meal</span>
+        </button>
+        <button id="btnUndoKit" class="btn btn-danger hidden">
+          <span>❌</span>
+          <span>Undo Kit</span>
+        </button>
+        <button id="btnUndoMeal" class="btn btn-danger hidden">
+          <span>❌</span>
+          <span>Undo Meal</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="recent-activity">
+      <div class="recent-title">📋 Recent Activity</div>
+      <div id="recentList" class="recent-list"></div>
+    </div>
+  </div>
+
+  <script>
+    // Supabase Configuration
+    const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+    
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Application State
+    const STATE = {
+      attendees: new Map(),
+      checkIns: new Map(),
+      stats: {
+        total: 0,
+        kitEntitled: 0,
+        kitCheckedIn: 0,
+        mealEntitled: 0,
+        mealCheckedIn: 0
+      },
+      isOnline: navigator.onLine,
+      currentAttendee: null
+    };
+
+    // DOM Elements
+    const elements = {
+      qrScanner: document.getElementById('qrScanner'),
+      manualEntry: document.getElementById('manualEntry'),
+      resultCard: document.getElementById('resultCard'),
+      resultIcon: document.getElementById('resultIcon'),
+      resultTitle: document.getElementById('resultTitle'),
+      resultSubtitle: document.getElementById('resultSubtitle'),
+      attendeeName: document.getElementById('attendeeName'),
+      badgeCode: document.getElementById('badgeCode'),
+      category: document.getElementById('category'),
+      institution: document.getElementById('institution'),
+      kitStatus: document.getElementById('kitStatus'),
+      mealStatus: document.getElementById('mealStatus'),
+      btnKitCheckIn: document.getElementById('btnKitCheckIn'),
+      btnMealCheckIn: document.getElementById('btnMealCheckIn'),
+      btnUndoKit: document.getElementById('btnUndoKit'),
+      btnUndoMeal: document.getElementById('btnUndoMeal'),
+      recentList: document.getElementById('recentList'),
+      offlineIndicator: document.getElementById('offlineIndicator')
+    };
+
+    // Utility Functions
+    const utils = {
+      showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => notification.classList.add('show'), 100);
+        setTimeout(() => {
+          notification.classList.remove('show');
+          setTimeout(() => notification.remove(), 300);
+        }, 3000);
+      },
+
+      playSound(success = true) {
+        try {
+          const ctx = new (window.AudioContext || window.webkitAudioContext)();
+          const oscillator = ctx.createOscillator();
+          const gainNode = ctx.createGain();
+          
+          oscillator.connect(gainNode);
+          gainNode.connect(ctx.destination);
+          
+          oscillator.type = 'sine';
+          oscillator.frequency.value = success ? 880 : 220;
+          gainNode.gain.value = 0.1;
+          
+          oscillator.start();
+          setTimeout(() => {
+            oscillator.stop();
+            ctx.close();
+          }, 100);
+        } catch (e) {
+          console.warn('Audio not supported');
+        }
+      },
+
+      formatTime(date) {
+        return new Intl.DateTimeFormat('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        }).format(new Date(date));
+      },
+
+      debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+          const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+          };
+          clearTimeout(timeout);
+          timeout = setTimeout(later, wait);
+        };
+      },
+
+      updateStats() {
+        document.getElementById('totalAttendees').textContent = STATE.stats.total;
+        document.getElementById('kitEntitled').textContent = STATE.stats.kitEntitled;
+        document.getElementById('kitCheckedIn').textContent = STATE.stats.kitCheckedIn;
+        document.getElementById('mealEntitled').textContent = STATE.stats.mealEntitled;
+        document.getElementById('mealCheckedIn').textContent = STATE.stats.mealCheckedIn;
+        document.getElementById('remaining').textContent = 
+          STATE.stats.kitEntitled - STATE.stats.kitCheckedIn;
+      }
+    };
+
+    // Database Operations
+    const db = {
+      async loadAttendees() {
+        try {
+          const { data, error } = await supabase
+            .from('attendee_checkin_status')
+            .select('*')
+            .order('full_name');
+
+          if (error) throw error;
+
+          STATE.attendees.clear();
+          STATE.stats = {
+            total: 0,
+            kitEntitled: 0,
+            kitCheckedIn: 0,
+            mealEntitled: 0,
+            mealCheckedIn: 0
+          };
+
+          data.forEach(attendee => {
+            STATE.attendees.set(attendee.badge_uid, attendee);
+            STATE.stats.total++;
+            
+            if (attendee.kit_entitled) {
+              STATE.stats.kitEntitled++;
+              if (attendee.kit_checked_in) STATE.stats.kitCheckedIn++;
+            }
+            
+            if (attendee.meal_entitled) {
+              STATE.stats.mealEntitled++;
+              if (attendee.meal_checked_in) STATE.stats.mealCheckedIn++;
+            }
+          });
+
+          utils.updateStats();
+          this.cacheData();
+        } catch (error) {
+          console.error('Error loading attendees:', error);
+          this.loadFromCache();
+        }
+      },
+
+      async performCheckIn(badgeUid, checkInType) {
+        try {
+          const { data, error } = await supabase
+            .rpc('perform_checkin', {
+              p_badge_uid: badgeUid,
+              p_check_in_type: checkInType,
+              p_checked_in_by: 'system',
+              p_location: 'main'
+            });
+
+          if (error) throw error;
+
+          if (data.success) {
+            await this.loadAttendees();
+            return { success: true, message: data.message };
+          } else {
+            return { success: false, message: data.message };
+          }
+        } catch (error) {
+          console.error('Check-in error:', error);
+          return { success: false, message: 'Network error. Please try again.' };
+        }
+      },
+
+      async performCheckOut(badgeUid, checkInType) {
+        try {
+          const { data, error } = await supabase
+            .rpc('perform_checkout', {
+              p_badge_uid: badgeUid,
+              p_check_in_type: checkInType,
+              p_checked_out_by: 'system'
+            });
+
+          if (error) throw error;
+
+          if (data.success) {
+            await this.loadAttendees();
+            return { success: true, message: data.message };
+          } else {
+            return { success: false, message: data.message };
+          }
+        } catch (error) {
+          console.error('Check-out error:', error);
+          return { success: false, message: 'Network error. Please try again.' };
+        }
+      },
+
+      cacheData() {
+        if ('localStorage' in window) {
+          localStorage.setItem('qr-checkin-cache', JSON.stringify({
+            attendees: Array.from(STATE.attendees.entries()),
+            stats: STATE.stats,
+            timestamp: Date.now()
+          }));
+        }
+      },
+
+      loadFromCache() {
+        if ('localStorage' in window) {
+          const cached = localStorage.getItem('qr-checkin-cache');
+          if (cached) {
+            try {
+              const data = JSON.parse(cached);
+              STATE.attendees = new Map(data.attendees);
+              STATE.stats = data.stats;
+              utils.updateStats();
+              utils.showNotification('Loaded from cache (offline mode)', 'info');
+            } catch (e) {
+              console.error('Cache load error:', e);
+            }
+          }
+        }
+      }
+    };
+
+    // UI Operations
+    const ui = {
+      showResult(attendee) {
+        STATE.currentAttendee = attendee;
+        
+        elements.resultCard.classList.remove('hidden', 'success', 'error', 'show');
+        elements.resultCard.classList.add('show');
+
+        if (attendee) {
+          elements.resultCard.classList.add('success');
+          elements.resultIcon.className = 'result-icon success';
+          elements.resultIcon.textContent = '✅';
+          elements.resultTitle.textContent = 'Attendee Found';
+          elements.resultSubtitle.textContent = 'Ready for check-in';
+
+          elements.attendeeName.textContent = attendee.full_name;
+          elements.badgeCode.textContent = attendee.badge_uid;
+          elements.category.textContent = attendee.category;
+          elements.institution.textContent = attendee.institution;
+
+          // Kit status
+          if (attendee.kit_entitled) {
+            if (attendee.kit_checked_in) {
+              elements.kitStatus.innerHTML = '<span class="status-badge checked-in">Checked In</span>';
+              elements.btnKitCheckIn.classList.add('hidden');
+              elements.btnUndoKit.classList.remove('hidden');
+            } else {
+              elements.kitStatus.innerHTML = '<span class="status-badge entitled">Entitled</span>';
+              elements.btnKitCheckIn.classList.remove('hidden');
+              elements.btnUndoKit.classList.add('hidden');
+            }
+          } else {
+            elements.kitStatus.innerHTML = '<span class="status-badge not-entitled">Not Entitled</span>';
+            elements.btnKitCheckIn.classList.add('hidden');
+            elements.btnUndoKit.classList.add('hidden');
+          }
+
+          // Meal status
+          if (attendee.meal_entitled) {
+            if (attendee.meal_checked_in) {
+              elements.mealStatus.innerHTML = '<span class="status-badge checked-in">Checked In</span>';
+              elements.btnMealCheckIn.classList.add('hidden');
+              elements.btnUndoMeal.classList.remove('hidden');
+            } else {
+              elements.mealStatus.innerHTML = '<span class="status-badge entitled">Entitled</span>';
+              elements.btnMealCheckIn.classList.remove('hidden');
+              elements.btnUndoMeal.classList.add('hidden');
+            }
+          } else {
+            elements.mealStatus.innerHTML = '<span class="status-badge not-entitled">Not Entitled</span>';
+            elements.btnMealCheckIn.classList.add('hidden');
+            elements.btnUndoMeal.classList.add('hidden');
+          }
+        } else {
+          elements.resultCard.classList.add('error');
+          elements.resultIcon.className = 'result-icon error';
+          elements.resultIcon.textContent = '❌';
+          elements.resultTitle.textContent = 'Attendee Not Found';
+          elements.resultSubtitle.textContent = 'Please check the badge code';
+
+          elements.attendeeName.textContent = '';
+          elements.badgeCode.textContent = '';
+          elements.category.textContent = '';
+          elements.institution.textContent = '';
+          elements.kitStatus.textContent = '';
+          elements.mealStatus.textContent = '';
+
+          elements.btnKitCheckIn.classList.add('hidden');
+          elements.btnMealCheckIn.classList.add('hidden');
+          elements.btnUndoKit.classList.add('hidden');
+          elements.btnUndoMeal.classList.add('hidden');
+        }
+      },
+
+      addRecentActivity(attendee, action, type) {
+        const item = document.createElement('div');
+        item.className = 'recent-item fade-in';
+        
+        const info = document.createElement('div');
+        info.className = 'recent-info';
+        info.innerHTML = `
+          <div class="recent-name">${attendee.full_name}</div>
+          <div class="recent-details">${action} ${type} • ${attendee.badge_uid}</div>
+        `;
+        
+        const time = document.createElement('div');
+        time.className = 'recent-time';
+        time.textContent = utils.formatTime(new Date());
+        
+        item.appendChild(info);
+        item.appendChild(time);
+        
+        elements.recentList.insertBefore(item, elements.recentList.firstChild);
+        
+        // Keep only last 20 items
+        while (elements.recentList.children.length > 20) {
+          elements.recentList.removeChild(elements.recentList.lastChild);
+        }
+      },
+
+      updateOfflineStatus() {
+        STATE.isOnline = navigator.onLine;
+        if (!STATE.isOnline) {
+          elements.offlineIndicator.classList.add('show');
+        } else {
+          elements.offlineIndicator.classList.remove('show');
+        }
+      }
+    };
+
+    // Event Handlers
+    const handleScan = utils.debounce(async (code) => {
+      const badgeUid = code.trim();
+      if (!badgeUid) return;
+
+      const attendee = STATE.attendees.get(badgeUid);
+      ui.showResult(attendee);
+      
+      if (attendee) {
+        utils.playSound(true);
+        elements.resultCard.classList.add('success-animation');
+        setTimeout(() => elements.resultCard.classList.remove('success-animation'), 600);
+      } else {
+        utils.playSound(false);
+        elements.resultCard.classList.add('error-animation');
+        setTimeout(() => elements.resultCard.classList.remove('error-animation'), 600);
+      }
+
+      elements.qrScanner.focus();
+    }, 300);
+
+    // QR Scanner Input
+    elements.qrScanner.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleScan(elements.qrScanner.value);
+        elements.qrScanner.value = '';
+      }
+    });
+
+    // Manual Entry with auto-trigger
+    elements.manualEntry.addEventListener('input', (e) => {
+      const code = e.target.value.trim();
+      if (code && code.length >= 3) {
+        const attendee = STATE.attendees.get(code);
+        if (attendee) {
+          handleScan(code);
+          e.target.value = '';
+          setTimeout(() => elements.qrScanner.focus(), 100);
+        }
+      }
+    });
+
+    // Manual Entry Enter key
+    elements.manualEntry.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleScan(elements.manualEntry.value);
+        elements.manualEntry.value = '';
+      }
+    });
+
+    // Check-in buttons
+    elements.btnKitCheckIn.addEventListener('click', async () => {
+      if (!STATE.currentAttendee) return;
+      
+      const result = await db.performCheckIn(STATE.currentAttendee.badge_uid, 'kit');
+      
+      if (result.success) {
+        utils.showNotification('Kit check-in successful!', 'success');
+        utils.playSound(true);
+        ui.addRecentActivity(STATE.currentAttendee, 'Checked in', 'Kit');
+        ui.showResult(STATE.attendees.get(STATE.currentAttendee.badge_uid));
+      } else {
+        utils.showNotification(result.message, 'error');
+        utils.playSound(false);
+      }
+    });
+
+    elements.btnMealCheckIn.addEventListener('click', async () => {
+      if (!STATE.currentAttendee) return;
+      
+      const result = await db.performCheckIn(STATE.currentAttendee.badge_uid, 'meal');
+      
+      if (result.success) {
+        utils.showNotification('Meal check-in successful!', 'success');
+        utils.playSound(true);
+        ui.addRecentActivity(STATE.currentAttendee, 'Checked in', 'Meal');
+        ui.showResult(STATE.attendees.get(STATE.currentAttendee.badge_uid));
+      } else {
+        utils.showNotification(result.message, 'error');
+        utils.playSound(false);
+      }
+    });
+
+    elements.btnUndoKit.addEventListener('click', async () => {
+      if (!STATE.currentAttendee) return;
+      
+      const result = await db.performCheckOut(STATE.currentAttendee.badge_uid, 'kit');
+      
+      if (result.success) {
+        utils.showNotification('Kit check-in undone', 'success');
+        utils.playSound(true);
+        ui.addRecentActivity(STATE.currentAttendee, 'Undid', 'Kit');
+        ui.showResult(STATE.attendees.get(STATE.currentAttendee.badge_uid));
+      } else {
+        utils.showNotification(result.message, 'error');
+        utils.playSound(false);
+      }
+    });
+
+    elements.btnUndoMeal.addEventListener('click', async () => {
+      if (!STATE.currentAttendee) return;
+      
+      const result = await db.performCheckOut(STATE.currentAttendee.badge_uid, 'meal');
+      
+      if (result.success) {
+        utils.showNotification('Meal check-in undone', 'success');
+        utils.playSound(true);
+        ui.addRecentActivity(STATE.currentAttendee, 'Undid', 'Meal');
+        ui.showResult(STATE.attendees.get(STATE.currentAttendee.badge_uid));
+      } else {
+        utils.showNotification(result.message, 'error');
+        utils.playSound(false);
+      }
+    });
+
+    // Auto-focus management
+    window.addEventListener('click', (e) => {
+      const target = e.target;
+      const isInput = target && (target.tagName === 'INPUT' || target.closest('input'));
+      if (!isInput) elements.qrScanner.focus();
+    });
+
+    // Online/offline detection
+    window.addEventListener('online', () => {
+      ui.updateOfflineStatus();
+      db.loadAttendees();
+    });
+
+    window.addEventListener('offline', () => {
+      ui.updateOfflineStatus();
+    });
+
+    // Initialize
+    window.addEventListener('load', async () => {
+      elements.qrScanner.focus();
+      ui.updateOfflineStatus();
+      
+      if (STATE.isOnline) {
+        await db.loadAttendees();
+      } else {
+        db.loadFromCache();
+      }
+    });
+  </script>
+</body>
+</html>

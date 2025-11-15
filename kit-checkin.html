@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kit Check-In System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0f1d;
+      --card: #111827;
+      --card-hover: #1f2937;
+      --accent: #10b981;
+      --accent-hover: #059669;
+      --warn: #ef4444;
+      --warn-hover: #dc2626;
+      --muted: #6b7280;
+      --text: #f9fafb;
+      --text-secondary: #d1d5db;
+      --border: #374151;
+      --border-hover: #4b5563;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, var(--bg) 0%, #1a1f2e 100%);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      padding: 16px;
+      background: var(--card);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+
+    .title {
+      font-size: 24px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 12px;
+      margin-top: 2px;
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .nav-btn {
+      background: var(--card-hover);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 8px 12px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .nav-btn:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .row {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .col {
+      flex: 1 1 250px;
+    }
+
+    .input-group {
+      margin-bottom: 12px;
+    }
+
+    .input-label {
+      display: block;
+      color: var(--text-secondary);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+
+    .input-field {
+      width: 100%;
+      font-size: 16px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 2px solid var(--border);
+      background: var(--card-hover);
+      color: var(--text);
+      outline: none;
+      transition: all 0.3s ease;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .input-field:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    .input-field.scanner {
+      font-size: 20px;
+      font-weight: 600;
+      text-align: center;
+      border-color: #8b5cf6;
+    }
+
+    .input-field.scanner:focus {
+      border-color: #7c3aed;
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: 12px;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .btn.success {
+      background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+    }
+
+    .btn.danger {
+      background: linear-gradient(135deg, var(--warn), var(--warn-hover));
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .kpi-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .kpi-label {
+      color: var(--text-secondary);
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+
+    .kpi-value {
+      font-size: 24px;
+      font-weight: 800;
+      color: #8b5cf6;
+      line-height: 1;
+    }
+
+    .result-card {
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      transition: all 0.3s ease;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    .result-card.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .result-card.ok {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    .result-card.bad {
+      border-color: var(--warn);
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .result-field {
+      background: var(--card-hover);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px;
+    }
+
+    .result-label {
+      color: var(--text-secondary);
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 2px;
+    }
+
+    .result-value {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .kit-status {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .kit-status.entitled {
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--accent);
+    }
+
+    .kit-status.checked-in {
+      background: rgba(139, 92, 246, 0.2);
+      color: #8b5cf6;
+    }
+
+    .kit-status.not-entitled {
+      background: rgba(239, 68, 68, 0.2);
+      color: var(--warn);
+    }
+
+    .recent-list {
+      max-height: 200px;
+      overflow-y: auto;
+      border-radius: 6px;
+    }
+
+    .recent-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+    }
+
+    .recent-item:hover {
+      background: var(--card-hover);
+    }
+
+    .recent-item:last-child {
+      border-bottom: none;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .fade-in {
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .success-animation {
+      animation: successPulse 0.6s ease-in-out;
+    }
+
+    @keyframes successPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    .error-animation {
+      animation: errorShake 0.6s ease-in-out;
+    }
+
+    @keyframes errorShake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div>
+        <div class="title">🎒 Kit Check-In System</div>
+        <div class="subtitle">Track kit entitlements and check-ins for event attendees</div>
+      </div>
+      <div class="nav-buttons">
+        <a href="phase1-scan.html" class="nav-btn">📋 Main System</a>
+        <a href="meal-checkin.html" class="nav-btn">🍽️ Meal Check-In</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <div class="col">
+          <div class="input-group">
+            <label for="scannerInput" class="input-label">🔍 Scan Badge for Kit Check-In</label>
+            <input id="scannerInput" type="text" class="input-field scanner" 
+                   placeholder="Click here, then scan QR code" 
+                   autocomplete="off" spellcheck="false" />
+            <div class="input-hint">Click to focus, then scan QR code for kit check-in</div>
+          </div>
+        </div>
+        
+        <div class="col">
+          <div class="input-group">
+            <label for="manualInput" class="input-label">⌨️ Manual Entry</label>
+            <input id="manualInput" type="text" class="input-field" 
+                   placeholder="Type badge UID and press Enter" 
+                   autocomplete="off" spellcheck="false" />
+                         <div class="input-hint">Type badge UID - auto-checks when valid</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Total Attendees</div>
+        <div id="kpiTotal" class="kpi-value">0</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Kit Entitled</div>
+        <div id="kpiEntitled" class="kpi-value">0</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Checked In</div>
+        <div id="kpiCheckedIn" class="kpi-value">0</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Remaining</div>
+        <div id="kpiRemaining" class="kpi-value">0</div>
+      </div>
+    </div>
+
+    <div id="resultCard" class="result-card hidden">
+      <div class="result-grid">
+        <div class="result-field">
+          <div class="result-label">Full Name</div>
+          <div id="v_full_name" class="result-value"></div>
+        </div>
+        <div class="result-field">
+          <div class="result-label">Badge UID</div>
+          <div id="v_badge_uid" class="result-value"></div>
+        </div>
+        <div class="result-field">
+          <div class="result-label">Category</div>
+          <div id="v_category" class="result-value"></div>
+        </div>
+        <div class="result-field">
+          <div class="result-label">Institution</div>
+          <div id="v_institution" class="result-value"></div>
+        </div>
+        <div class="result-field">
+          <div class="result-label">Kit Status</div>
+          <div id="v_kit_status" class="result-value"></div>
+        </div>
+        <div class="result-field">
+          <div class="result-label">Check-In Time</div>
+          <div id="v_checkin_time" class="result-value"></div>
+        </div>
+      </div>
+      
+      <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 16px;">
+        <button id="btnCheckIn" class="btn success">✅ Check-In for Kit</button>
+        <button id="btnUndoCheckIn" class="btn danger">❌ Undo Check-In</button>
+        <span class="input-hint">Click to check-in or undo kit check-in</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="input-label" style="margin-bottom: 12px; font-size: 14px;">📋 Recent Kit Check-Ins</div>
+      <div id="recentList" class="recent-list"></div>
+    </div>
+  </div>
+
+  <script>
+    const STATE = {
+      headers: [],
+      rows: [],
+      indexByUid: new Map(),
+      kitCheckIns: new Set(),
+      total: 0,
+      entitled: 0,
+      checkedIn: 0
+    };
+
+    const elements = {
+      scannerInput: document.getElementById('scannerInput'),
+      manualInput: document.getElementById('manualInput'),
+      resultCard: document.getElementById('resultCard'),
+      recentList: document.getElementById('recentList'),
+      btnCheckIn: document.getElementById('btnCheckIn'),
+      btnUndoCheckIn: document.getElementById('btnUndoCheckIn')
+    };
+
+    const utils = {
+      csvParse(text) {
+        const rows = [];
+        let i = 0, field = '', row = [], inQuotes = false;
+        text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+        
+        while (i < text.length) {
+          const c = text[i++];
+          if (inQuotes) {
+            if (c === '"') {
+              if (text[i] === '"') { field += '"'; i++; }
+              else { inQuotes = false; }
+            } else { field += c; }
+          } else {
+            if (c === '"') { inQuotes = true; }
+            else if (c === ',') { row.push(field); field = ''; }
+            else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
+            else { field += c; }
+          }
+        }
+        if (field.length || row.length) { row.push(field); rows.push(row); }
+        return rows;
+      },
+
+      buildIndex() {
+        STATE.indexByUid.clear();
+        const idxUid = STATE.headers.indexOf('badge_uid');
+        const idxKit = STATE.headers.indexOf('kit_entitled(yes/no)');
+        
+        for (const r of STATE.rows) {
+          const uid = (r[idxUid] || '').trim();
+          const kitEntitled = (r[idxKit] || '').toLowerCase() === 'yes';
+          if (uid) { 
+            STATE.indexByUid.set(uid, r);
+            if (kitEntitled) STATE.entitled++;
+          }
+        }
+        STATE.total = STATE.rows.length;
+        this.updateKPIs();
+      },
+
+      updateKPIs() {
+        document.getElementById('kpiTotal').textContent = STATE.total;
+        document.getElementById('kpiEntitled').textContent = STATE.entitled;
+        document.getElementById('kpiCheckedIn').textContent = STATE.checkedIn;
+        document.getElementById('kpiRemaining').textContent = STATE.entitled - STATE.checkedIn;
+      },
+
+      beep(ok) {
+        try {
+          const ctx = new (window.AudioContext || window.webkitAudioContext)();
+          const o = ctx.createOscillator();
+          const g = ctx.createGain();
+          o.connect(g); g.connect(ctx.destination);
+          o.type = 'sine';
+          o.frequency.value = ok ? 880 : 220;
+          g.gain.value = 0.02;
+          o.start();
+          setTimeout(() => { o.stop(); ctx.close(); }, 100);
+        } catch (e) { console.warn('Audio not supported'); }
+      },
+
+      showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+          position: fixed; top: 20px; right: 20px; padding: 16px 24px; 
+          border-radius: 8px; color: white; font-weight: 600; z-index: 1000;
+          background: ${type === 'success' ? '#8b5cf6' : type === 'error' ? 'var(--warn)' : 'var(--muted)'};
+          box-shadow: var(--shadow-lg); transform: translateX(100%); transition: transform 0.3s ease;
+        `;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => notification.style.transform = 'translateX(0)', 100);
+        setTimeout(() => {
+          notification.style.transform = 'translateX(100%)';
+          setTimeout(() => notification.remove(), 300);
+        }, 3000);
+      }
+    };
+
+    const dataManager = {
+      async tryFetchDefault() {
+        try {
+          const res = await fetch('data/master.csv', { cache: 'no-store' });
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const text = await res.text();
+          this.onCsvLoaded(text);
+        } catch (e) {
+          utils.showNotification('No data loaded. Please upload CSV file.', 'error');
+        }
+      },
+
+      onCsvLoaded(text) {
+        const table = utils.csvParse(text).filter(r => r.length && r.some(x => (x || '').trim() !== ''));
+        if (table.length === 0) { 
+          utils.showNotification('CSV empty', 'error'); 
+          return; 
+        }
+        
+        STATE.headers = table[0].map(h => (h || '').trim());
+        STATE.rows = table.slice(1);
+        STATE.entitled = 0;
+        STATE.checkedIn = 0;
+        utils.buildIndex();
+        utils.showNotification(`Loaded ${STATE.rows.length} records`, 'success');
+      }
+    };
+
+    const kitSystem = {
+      showResult(ok, rec) {
+        elements.resultCard.classList.remove('hidden', 'ok', 'bad', 'show');
+        elements.resultCard.classList.add(ok ? 'ok' : 'bad', 'show');
+        
+        if (ok) {
+          const H = STATE.headers;
+          const get = name => rec[H.indexOf(name)] || '';
+          const uid = get('badge_uid');
+          const kitEntitled = (get('kit_entitled(yes/no)') || '').toLowerCase() === 'yes';
+          const isCheckedIn = STATE.kitCheckIns.has(uid);
+          
+          document.getElementById('v_full_name').textContent = get('full_name');
+          document.getElementById('v_badge_uid').textContent = uid;
+          document.getElementById('v_category').textContent = get('category');
+          document.getElementById('v_institution').textContent = get('institution');
+          
+          if (kitEntitled) {
+            if (isCheckedIn) {
+              document.getElementById('v_kit_status').innerHTML = '<span class="kit-status checked-in">Checked In</span>';
+              document.getElementById('v_checkin_time').textContent = 'Already checked in';
+              elements.btnCheckIn.style.display = 'none';
+              elements.btnUndoCheckIn.style.display = 'inline-block';
+            } else {
+              document.getElementById('v_kit_status').innerHTML = '<span class="kit-status entitled">Entitled</span>';
+              document.getElementById('v_checkin_time').textContent = 'Not checked in yet';
+              elements.btnCheckIn.style.display = 'inline-block';
+              elements.btnUndoCheckIn.style.display = 'none';
+            }
+          } else {
+            document.getElementById('v_kit_status').innerHTML = '<span class="kit-status not-entitled">Not Entitled</span>';
+            document.getElementById('v_checkin_time').textContent = 'No kit entitlement';
+            elements.btnCheckIn.style.display = 'none';
+            elements.btnUndoCheckIn.style.display = 'none';
+          }
+        } else {
+          ['v_full_name', 'v_badge_uid', 'v_category', 'v_institution', 'v_kit_status', 'v_checkin_time'].forEach(id => {
+            document.getElementById(id).textContent = '';
+          });
+          elements.btnCheckIn.style.display = 'none';
+          elements.btnUndoCheckIn.style.display = 'none';
+        }
+      },
+
+      addRecent(uid, name, action) {
+        const div = document.createElement('div');
+        div.className = 'recent-item fade-in';
+        const left = document.createElement('div');
+        left.textContent = uid || '(empty)';
+        const right = document.createElement('div');
+        right.textContent = `${action}: ${name || ''}`;
+        right.style.color = action === 'Check-In' ? '#8b5cf6' : '#ef4444';
+        div.append(left, right);
+        elements.recentList.prepend(div);
+        while (elements.recentList.childElementCount > 30) {
+          elements.recentList.removeChild(elements.recentList.lastChild);
+        }
+      },
+
+      onEnter(code) {
+        const uid = (code || '').trim();
+        if (!uid) return;
+        
+        const rec = STATE.indexByUid.get(uid);
+        const ok = !!rec;
+        
+        kitSystem.showResult(ok, rec);
+        utils.beep(ok);
+        
+        if (ok) {
+          elements.resultCard.classList.add('success-animation');
+          setTimeout(() => elements.resultCard.classList.remove('success-animation'), 600);
+        } else {
+          elements.resultCard.classList.add('error-animation');
+          setTimeout(() => elements.resultCard.classList.remove('error-animation'), 600);
+        }
+        
+        elements.scannerInput.select();
+      },
+
+      checkIn() {
+        const uid = document.getElementById('v_badge_uid').textContent.trim();
+        if (!uid) return;
+        
+        if (STATE.kitCheckIns.has(uid)) {
+          utils.showNotification('Already checked in for kit', 'error');
+          return;
+        }
+        
+        STATE.kitCheckIns.add(uid);
+        STATE.checkedIn++;
+        utils.updateKPIs();
+        
+        const name = document.getElementById('v_full_name').textContent;
+        kitSystem.addRecent(uid, name, 'Check-In');
+        kitSystem.showResult(true, STATE.indexByUid.get(uid));
+        
+        utils.showNotification('Kit check-in successful!', 'success');
+        utils.beep(true);
+      },
+
+      undoCheckIn() {
+        const uid = document.getElementById('v_badge_uid').textContent.trim();
+        if (!uid) return;
+        
+        if (!STATE.kitCheckIns.has(uid)) {
+          utils.showNotification('Not checked in for kit', 'error');
+          return;
+        }
+        
+        STATE.kitCheckIns.delete(uid);
+        STATE.checkedIn--;
+        utils.updateKPIs();
+        
+        const name = document.getElementById('v_full_name').textContent;
+        kitSystem.addRecent(uid, name, 'Undo');
+        kitSystem.showResult(true, STATE.indexByUid.get(uid));
+        
+        utils.showNotification('Kit check-in undone', 'success');
+        utils.beep(true);
+      }
+    };
+
+    // Event Handlers
+    elements.scannerInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        kitSystem.onEnter(elements.scannerInput.value);
+        elements.scannerInput.value = '';
+      }
+    });
+
+    // Manual input - auto-trigger on valid input
+    elements.manualInput.addEventListener('input', (e) => {
+      const code = e.target.value.trim();
+      if (code && code.length >= 3) { // Minimum 3 characters to avoid false triggers
+        const rec = STATE.indexByUid.get(code);
+        if (rec) {
+          // Valid badge found - auto-trigger check-in
+          kitSystem.onEnter(code);
+          e.target.value = '';
+          // Auto-focus scanner for next scan
+          setTimeout(() => elements.scannerInput.focus(), 100);
+        }
+      }
+    });
+
+    // Keep Enter key as backup
+    elements.manualInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        kitSystem.onEnter(elements.manualInput.value);
+        elements.manualInput.value = '';
+      }
+    });
+
+    elements.btnCheckIn.addEventListener('click', () => {
+      kitSystem.checkIn();
+    });
+
+    elements.btnUndoCheckIn.addEventListener('click', () => {
+      kitSystem.undoCheckIn();
+    });
+
+    // Auto-focus management
+    window.addEventListener('click', (e) => {
+      const t = e.target;
+      const isInput = t && (t.tagName === 'INPUT' || t.closest('input'));
+      if (!isInput) elements.scannerInput.focus();
+    });
+
+    // Initialize
+    window.addEventListener('load', () => {
+      elements.scannerInput.focus();
+      dataManager.tryFetchDefault();
+    });
+  </script>
+</body>
+</html>

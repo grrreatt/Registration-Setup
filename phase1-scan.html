@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QR Check-In System - Lightning Fast</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0f1d;
+      --card: #111827;
+      --card-hover: #1f2937;
+      --accent: #10b981;
+      --accent-hover: #059669;
+      --warn: #ef4444;
+      --warn-hover: #dc2626;
+      --muted: #6b7280;
+      --text: #f9fafb;
+      --text-secondary: #d1d5db;
+      --border: #374151;
+      --border-hover: #4b5563;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, var(--bg) 0%, #1a1f2e 100%);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      padding: 16px;
+      background: var(--card);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+
+    .title {
+      font-size: 24px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent), #34d399);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.025em;
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 12px;
+      margin-top: 2px;
+      font-weight: 400;
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: var(--card-hover);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--muted);
+      transition: all 0.3s ease;
+    }
+
+    .dot.ok {
+      background: var(--accent);
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
+    }
+
+    .dot.bad {
+      background: var(--warn);
+      box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.2);
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+      transition: all 0.3s ease;
+    }
+
+    .card:hover {
+      border-color: var(--border-hover);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .row {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .col {
+      flex: 1 1 250px;
+    }
+
+    .input-group {
+      margin-bottom: 12px;
+    }
+
+    .input-label {
+      display: block;
+      color: var(--text-secondary);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+
+    .input-field {
+      width: 100%;
+      font-size: 16px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 2px solid var(--border);
+      background: var(--card-hover);
+      color: var(--text);
+      outline: none;
+      transition: all 0.3s ease;
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+    }
+
+    .input-field:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+      background: var(--card);
+    }
+
+    .input-field.scanner {
+      font-size: 20px;
+      font-weight: 600;
+      text-align: center;
+      background: linear-gradient(135deg, var(--card-hover), var(--card));
+      border-color: var(--accent);
+    }
+
+    .input-field.scanner:focus {
+      border-color: var(--accent-hover);
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+      transform: scale(1.01);
+    }
+
+    .input-hint {
+      color: var(--muted);
+      font-size: 11px;
+      margin-top: 4px;
+      font-weight: 400;
+    }
+
+    .btn {
+      appearance: none;
+      border: none;
+      background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+      color: white;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: 12px;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn.secondary {
+      background: linear-gradient(135deg, var(--border), var(--border-hover));
+    }
+
+    .btn.danger {
+      background: linear-gradient(135deg, var(--warn), var(--warn-hover));
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .kpi-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .kpi-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    .kpi-label {
+      color: var(--text-secondary);
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+
+    .kpi-value {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    .result-card {
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      transition: all 0.3s ease;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    .result-card.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .result-card.ok {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    .result-card.bad {
+      border-color: var(--warn);
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .result-field {
+      background: var(--card-hover);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px;
+    }
+
+    .result-label {
+      color: var(--text-secondary);
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 2px;
+    }
+
+    .result-value {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+      word-break: break-word;
+    }
+
+    .upload-area {
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .upload-area:hover {
+      border-color: var(--accent);
+      background: rgba(16, 185, 129, 0.05);
+    }
+
+    .upload-area.dragover {
+      border-color: var(--accent);
+      background: rgba(16, 185, 129, 0.1);
+      transform: scale(1.01);
+    }
+
+    .recent-list {
+      max-height: 200px;
+      overflow-y: auto;
+      border-radius: 6px;
+    }
+
+    .recent-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      transition: all 0.2s ease;
+    }
+
+    .recent-item:hover {
+      background: var(--card-hover);
+    }
+
+    .recent-item:last-child {
+      border-bottom: none;
+    }
+
+    .recent-uid {
+      font-weight: 600;
+      color: var(--text);
+      font-size: 12px;
+    }
+
+    .recent-name {
+      font-weight: 500;
+      font-size: 12px;
+    }
+
+    .recent-name.found {
+      color: var(--accent);
+    }
+
+    .recent-name.not-found {
+      color: var(--warn);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .fade-in {
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .success-animation {
+      animation: successPulse 0.6s ease-in-out;
+    }
+
+    @keyframes successPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    .error-animation {
+      animation: errorShake 0.6s ease-in-out;
+    }
+
+    @keyframes errorShake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+
+    .checkbox-group {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      margin: 12px 0;
+    }
+
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .checkbox-item input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--accent);
+    }
+
+    .checkbox-item label {
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .printer-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 12px;
+      padding: 8px 12px;
+      background: var(--card-hover);
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+
+    .printer-line {
+      height: 3px;
+      border-radius: 2px;
+      background: var(--warn);
+      margin: 6px 0 12px;
+      transition: background-color 0.3s ease;
+    }
+
+    .printer-line.ok {
+      background: var(--accent);
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 16px;
+      }
+      
+      .header {
+        flex-direction: column;
+        gap: 16px;
+        text-align: center;
+      }
+      
+      .title {
+        font-size: 24px;
+      }
+      
+      .kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .result-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .input-field {
+        font-size: 16px;
+        padding: 14px 16px;
+      }
+      
+      .input-field.scanner {
+        font-size: 20px;
+      }
+    }
+
+    /* Print styles */
+    #printArea {
+      display: none;
+      background: white;
+      color: black;
+    }
+
+    #printBadgeCard {
+      width: 105mm;
+      height: 148mm;
+      padding: 0;
+      border: none;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      position: relative;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 8px;
+      overflow: hidden;
+      page-break-after: avoid;
+      page-break-inside: avoid;
+    }
+
+    @page {
+      size: A6 portrait;
+      margin: 0;
+    }
+
+    #pb_header {
+      background: rgba(255,255,255,0.95);
+      padding: 12px 16px;
+      text-align: center;
+      position: relative;
+    }
+
+    #pb_event_title {
+      font-size: 14pt;
+      font-weight: 800;
+      color: #2c3e50;
+      margin: 0;
+      letter-spacing: 0.5px;
+    }
+
+    #pb_event_subtitle {
+      font-size: 10pt;
+      color: #7f8c8d;
+      margin: 3px 0 0 0;
+      font-weight: 500;
+    }
+
+    #pb_content {
+      padding: 20px 16px;
+      background: white;
+      height: calc(100% - 70px);
+      position: relative;
+    }
+
+    #pb_name {
+      font-size: 18pt;
+      font-weight: 700;
+      color: #2c3e50;
+      margin: 0 0 12px 0;
+      line-height: 1.2;
+    }
+
+    #pb_cat {
+      display: inline-block;
+      background: linear-gradient(135deg, #e74c3c, #c0392b);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 15px;
+      font-size: 10pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+
+    #pb_inst {
+      font-size: 11pt;
+      color: #34495e;
+      margin: 0 0 15px 0;
+      font-weight: 500;
+    }
+
+    #pb_qr_section {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      text-align: center;
+      background: #f8f9fa;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #e9ecef;
+    }
+
+    #pb_qr_code {
+      width: 60px;
+      height: 60px;
+      background: #333;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 7px;
+      margin-bottom: 6px;
+    }
+
+    #pb_qr_label {
+      font-size: 8pt;
+      color: #6c757d;
+      font-weight: 600;
+    }
+
+    #pb_info {
+      position: absolute;
+      bottom: 16px;
+      left: 16px;
+      right: 100px;
+      background: #f8f9fa;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #e9ecef;
+      font-size: 9pt;
+      color: #495057;
+    }
+
+    #pb_uid {
+      position: absolute;
+      bottom: 16px;
+      right: 16px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-size: 10pt;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    @media print {
+      body * {
+        visibility: hidden !important;
+      }
+      #printArea, #printArea * {
+        visibility: visible !important;
+      }
+      #printArea {
+        display: block;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 105mm;
+        height: 148mm;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div>
+        <div class="title">QR Check-In System</div>
+        <div class="subtitle">Lightning-fast attendee lookup and registration. Works with hardware barcode/QR scanners.</div>
+      </div>
+      <div class="status">
+        <div id="dataDot" class="dot"></div>
+        <span id="dataStatus" class="subtitle">Loading data...</span>
+      </div>
+      <div class="nav-buttons" style="display: flex; gap: 8px; margin-top: 12px;">
+        <a href="meal-checkin.html" class="btn secondary" style="text-decoration: none; display: inline-block;">🍽️ Meal Check-In</a>
+        <a href="kit-checkin.html" class="btn secondary" style="text-decoration: none; display: inline-block;">🎒 Kit Check-In</a>
+      </div>
+    </div>
+
+    <!-- Printer Status -->
+    <div id="printerLine" class="printer-line"></div>
+
+    <!-- Scanner Section -->
+    <div class="card">
+      <div class="row">
+      <div class="col">
+          <div class="input-group">
+            <label for="scannerInput" class="input-label">🔍 Scanner Input</label>
+            <input id="scannerInput" type="text" class="input-field scanner" 
+                   placeholder="Click here, then scan QR code" 
+                   autocomplete="off" spellcheck="false" />
+            <div class="input-hint">Click to focus, then scan QR code. Scanner will auto-enter and submit.</div>
+      </div>
+        </div>
+        
+      <div class="col">
+          <div class="input-group">
+            <label for="armedScanInput" class="input-label">⌨️ Manual Entry</label>
+            <input id="armedScanInput" type="text" class="input-field" 
+                   placeholder="Type badge UID - auto-prints when valid (e.g., MED0023)" 
+                   autocomplete="off" spellcheck="false" />
+            <div class="input-hint">Type badge UID - prints automatically when valid</div>
+        </div>
+      </div>
+      </div>
+
+      <div class="upload-area" id="uploadArea">
+        <div class="input-label">📁 CSV Data Upload</div>
+        <div class="input-hint">Drag & drop or click to upload master.csv</div>
+        <input id="fileInput" type="file" accept=".csv" style="display: none;" />
+      </div>
+    </div>
+
+    <!-- KPI Dashboard -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Rows Loaded</div>
+        <div id="kpiRows" class="kpi-value">0</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Index Ready</div>
+        <div id="kpiIndex" class="kpi-value">0</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Last Lookup (ms)</div>
+        <div id="kpiMs" class="kpi-value">–</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Success Rate</div>
+        <div id="kpiHit" class="kpi-value">0%</div>
+      </div>
+    </div>
+
+    <!-- Result Display -->
+    <div id="resultCard" class="result-card hidden">
+      <div class="result-grid">
+        <div class="result-field">
+          <div class="result-label">Full Name</div>
+          <div id="v_full_name" class="result-value"></div>
+      </div>
+        <div class="result-field">
+          <div class="result-label">Badge UID</div>
+          <div id="v_badge_uid" class="result-value"></div>
+        </div>
+        <div class="result-field">
+          <div class="result-label">Category</div>
+          <div id="v_category" class="result-value"></div>
+        </div>
+        <div class="result-field">
+          <div class="result-label">Institution</div>
+          <div id="v_institution" class="result-value"></div>
+        </div>
+        <div class="result-field">
+          <div class="result-label">Email</div>
+          <div id="v_email" class="result-value"></div>
+        </div>
+        <div class="result-field">
+          <div class="result-label">Phone</div>
+          <div id="v_phone" class="result-value"></div>
+        </div>
+        <div class="result-field">
+          <div class="result-label">Meal Entitled</div>
+          <div id="v_meal" class="result-value"></div>
+        </div>
+        <div class="result-field">
+          <div class="result-label">Kit Entitled</div>
+          <div id="v_kit" class="result-value"></div>
+        </div>
+        <div class="result-field" style="grid-column: 1 / -1;">
+          <div class="result-label">Badge Template</div>
+          <div id="v_tpl" class="result-value"></div>
+        </div>
+        <div class="result-field" style="grid-column: 1 / -1;">
+          <div class="result-label">Notes</div>
+          <div id="v_notes" class="result-value"></div>
+      </div>
+    </div>
+
+      <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 20px;">
+        <button id="btnPrintExisting" class="btn">🖨️ Print Badge</button>
+        <span class="input-hint">Preview above → click to print</span>
+        <span id="qzStatus" class="input-hint" style="margin-left: 8px;"></span>
+        <select id="printerSelect" style="min-width: 240px; padding: 8px 12px; border-radius: 8px; background: var(--card-hover); color: var(--text); border: 1px solid var(--border);"></select>
+        <button id="btnQzConnect" class="btn secondary">🔗 Connect QZ</button>
+        <button id="btnPrinterRefresh" class="btn secondary">🔄 Refresh</button>
+        <button id="btnPrinterTest" class="btn secondary">🧪 Test</button>
+      </div>
+    </div>
+
+    <!-- New Registration -->
+    <div class="card">
+      <div class="input-label" style="margin-bottom: 16px; font-size: 16px;">➕ New Registration (Instant Badge)</div>
+      <div class="row">
+        <div class="col">
+          <div class="input-group">
+            <label for="nr_full_name" class="input-label">Full Name</label>
+            <input id="nr_full_name" type="text" class="input-field" placeholder="Enter full name" />
+          </div>
+        </div>
+        <div class="col">
+          <div class="input-group">
+            <label for="nr_email" class="input-label">Email</label>
+            <input id="nr_email" type="email" class="input-field" placeholder="Enter email address" />
+          </div>
+        </div>
+      </div>
+      
+          <div class="row">
+        <div class="col">
+          <div class="input-group">
+            <label for="nr_badge_uid" class="input-label">Badge UID (Unique)</label>
+            <input id="nr_badge_uid" type="text" class="input-field" placeholder="Enter unique badge ID" />
+          </div>
+        </div>
+        <div class="col">
+          <div class="input-group">
+            <label for="nr_category" class="input-label">Category</label>
+            <input id="nr_category" type="text" class="input-field" placeholder="delegate/faculty/exhibitor/staff/chairperson" />
+          </div>
+        </div>
+      </div>
+      
+          <div class="row">
+        <div class="col">
+          <div class="input-group">
+            <label for="nr_institution" class="input-label">Institution</label>
+            <input id="nr_institution" type="text" class="input-field" placeholder="Enter institution name" />
+          </div>
+        </div>
+            <div class="col">
+          <div class="input-group">
+            <label for="nr_phone" class="input-label">Phone</label>
+            <input id="nr_phone" type="tel" class="input-field" placeholder="Enter phone number" />
+            </div>
+        </div>
+      </div>
+      
+      <div class="row">
+            <div class="col">
+          <div class="checkbox-group">
+            <div class="checkbox-item">
+              <input id="nr_meal" type="checkbox" />
+              <label for="nr_meal">Meal Entitled</label>
+            </div>
+            <div class="checkbox-item">
+              <input id="nr_kit" type="checkbox" />
+              <label for="nr_kit">Kit Entitled</label>
+          </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="input-group">
+            <label for="nr_tpl" class="input-label">Badge Template</label>
+            <input id="nr_tpl" type="text" class="input-field" placeholder="TPL_A6_V1" value="TPL_A6_V1" />
+        </div>
+      </div>
+    </div>
+
+      <div style="margin-top: 20px;">
+        <button id="btnCreateBadge" class="btn">✨ Create & Print Badge</button>
+        <div class="input-hint" style="margin-top: 8px;">
+          Creates entry in new-registrations-*.csv download and makes it searchable immediately.
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Lookups -->
+    <div class="card">
+      <div class="input-label" style="margin-bottom: 16px; font-size: 16px;">📋 Recent Lookups</div>
+      <div id="recentList" class="recent-list"></div>
+    </div>
+  </div>
+
+  <!-- Print Area -->
+  <div id="printArea">
+    <div id="printBadgeCard">
+      <div id="pb_header">
+        <div id="pb_event_title">MEDICAL CONFERENCE 2025</div>
+        <div id="pb_event_subtitle">Annual Healthcare Summit</div>
+      </div>
+      <div id="pb_content">
+      <div id="pb_name"></div>
+      <div id="pb_cat"></div>
+      <div id="pb_inst"></div>
+        
+        <div id="pb_qr_section">
+          <div id="pb_qr_code">QR<br>CODE</div>
+          <div id="pb_qr_label"></div>
+        </div>
+        
+        <div id="pb_info">
+          <div style="margin-bottom: 4px;">Meal: <span id="pb_meal"></span></div>
+          <div style="margin-bottom: 4px;">Kit: <span id="pb_kit"></span></div>
+          <div>Template: TPL_A6_V1</div>
+        </div>
+        
+      <div id="pb_uid"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qz-tray/2.1.0/qz-tray.js"></script>
+  <script src="printer/zpl-templates.js"></script>
+  <script>
+    // Enhanced QR Check-In System - Lightning Fast
+    const STATE = {
+      headers: [],
+      rows: [],
+      indexByUid: new Map(),
+      hits: 0,
+      total: 0,
+      lastLookupTime: 0,
+      isPrinterConnected: false
+    };
+
+    const REQUIRED_HEADERS = [
+      'event_code', 'badge_uid', 'full_name', 'email', 'category', 
+      'meal_entitled(yes/no)', 'kit_entitled(yes/no)', 'institution', 
+      'phone', 'badge_print_template', 'notes'
+    ];
+
+    // DOM Elements
+    const elements = {
+      scannerInput: document.getElementById('scannerInput'),
+      armedScanInput: document.getElementById('armedScanInput'),
+      fileInput: document.getElementById('fileInput'),
+      uploadArea: document.getElementById('uploadArea'),
+      dataDot: document.getElementById('dataDot'),
+      dataStatus: document.getElementById('dataStatus'),
+      kpiRows: document.getElementById('kpiRows'),
+      kpiIndex: document.getElementById('kpiIndex'),
+      kpiMs: document.getElementById('kpiMs'),
+      kpiHit: document.getElementById('kpiHit'),
+      resultCard: document.getElementById('resultCard'),
+      recentList: document.getElementById('recentList'),
+      printerLine: document.getElementById('printerLine'),
+      printerSelect: document.getElementById('printerSelect'),
+      qzStatus: document.getElementById('qzStatus')
+    };
+
+    // Utility Functions
+    const utils = {
+      setDataStatus(ok, msg) {
+        elements.dataDot.classList.toggle('ok', !!ok);
+        elements.dataDot.classList.toggle('bad', !ok);
+        elements.dataStatus.textContent = msg;
+      },
+
+      csvParse(text) {
+      const rows = [];
+        let i = 0, field = '', row = [], inQuotes = false;
+      text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+        
+        while (i < text.length) {
+        const c = text[i++];
+          if (inQuotes) {
+            if (c === '"') {
+              if (text[i] === '"') { field += '"'; i++; }
+            else { inQuotes = false; }
+          } else { field += c; }
+        } else {
+            if (c === '"') { inQuotes = true; }
+            else if (c === ',') { row.push(field); field = ''; }
+            else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
+          else { field += c; }
+        }
+      }
+        if (field.length || row.length) { row.push(field); rows.push(row); }
+      return rows;
+      },
+
+      buildIndex() {
+      STATE.indexByUid.clear();
+      const idxUid = STATE.headers.indexOf('badge_uid');
+        for (const r of STATE.rows) {
+          const uid = (r[idxUid] || '').trim();
+          if (uid) { STATE.indexByUid.set(uid, r); }
+        }
+        elements.kpiIndex.textContent = STATE.indexByUid.size;
+        utils.setDataStatus(true, `Loaded ${STATE.rows.length} rows`);
+      },
+
+      validateHeaders(headers) {
+      const missing = REQUIRED_HEADERS.filter(h => !headers.includes(h));
+      return { ok: missing.length === 0, missing };
+      },
+
+      toYesNo(b) { return b ? 'yes' : 'no'; },
+
+      beep(ok) {
+        try {
+          const ctx = new (window.AudioContext || window.webkitAudioContext)();
+          const o = ctx.createOscillator();
+          const g = ctx.createGain();
+          o.connect(g); g.connect(ctx.destination);
+          o.type = 'sine';
+          o.frequency.value = ok ? 880 : 220;
+          g.gain.value = 0.02;
+          o.start();
+          setTimeout(() => { o.stop(); ctx.close(); }, 100);
+        } catch (e) { console.warn('Audio not supported'); }
+      },
+
+      showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+          position: fixed; top: 20px; right: 20px; padding: 16px 24px; 
+          border-radius: 8px; color: white; font-weight: 600; z-index: 1000;
+          background: ${type === 'success' ? 'var(--accent)' : type === 'error' ? 'var(--warn)' : 'var(--muted)'};
+          box-shadow: var(--shadow-lg); transform: translateX(100%); transition: transform 0.3s ease;
+        `;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => notification.style.transform = 'translateX(0)', 100);
+        setTimeout(() => {
+          notification.style.transform = 'translateX(100%)';
+          setTimeout(() => notification.remove(), 300);
+        }, 3000);
+      }
+    };
+
+    // Data Management
+    const dataManager = {
+      async tryFetchDefault() {
+        try {
+          const res = await fetch('data/master.csv', { cache: 'no-store' });
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+        const text = await res.text();
+          this.onCsvLoaded(text);
+        } catch (e) {
+          utils.setDataStatus(false, 'No data (upload CSV)');
+        }
+      },
+
+      onCsvLoaded(text) {
+        const table = utils.csvParse(text).filter(r => r.length && r.some(x => (x || '').trim() !== ''));
+        if (table.length === 0) { utils.setDataStatus(false, 'CSV empty'); return; }
+        
+        STATE.headers = table[0].map(h => (h || '').trim());
+        const val = utils.validateHeaders(STATE.headers);
+        if (!val.ok) {
+          utils.setDataStatus(false, `Missing headers: ${val.missing.join(', ')}`);
+        return;
+      }
+        
+      STATE.rows = table.slice(1);
+        elements.kpiRows.textContent = STATE.rows.length;
+        STATE.total = 0; STATE.hits = 0; elements.kpiHit.textContent = '0%';
+        utils.buildIndex();
+        utils.showNotification(`Loaded ${STATE.rows.length} records successfully`, 'success');
+      },
+
+      upsertLocalIndex(rowObj) {
+      const row = REQUIRED_HEADERS.map(h => rowObj[h] ?? '');
+      const uid = rowObj['badge_uid'];
+        if (STATE.indexByUid.has(uid)) {
+          const idx = STATE.rows.findIndex(r => (r[STATE.headers.indexOf('badge_uid')] || '') === uid);
+          if (idx >= 0) STATE.rows[idx] = row;
+      } else {
+        STATE.rows.push(row);
+      }
+      STATE.indexByUid.set(uid, row);
+        elements.kpiRows.textContent = STATE.rows.length;
+        elements.kpiIndex.textContent = STATE.indexByUid.size;
+      },
+
+      async appendNewRegistration(rowObj) {
+      const vals = REQUIRED_HEADERS.map(h => {
+        let v = rowObj[h] ?? '';
+        v = String(v);
+          if (v.includes('"')) v = v.replace(/"/g, '""');
+          if (/[",\n\r]/.test(v)) v = '"' + v + '"';
+        return v;
+      });
+      const header = REQUIRED_HEADERS.join(',');
+      const line = '\n' + vals.join(',');
+        const blob = new Blob([header + line], { type: 'text/csv;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+        const date = new Date().toISOString().replace(/[:.]/g, '-');
+      a.download = `new-registrations-${date}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+    };
+
+    // Lookup System
+    const lookupSystem = {
+      showResult(ok, rec) {
+        elements.resultCard.classList.remove('hidden', 'ok', 'bad', 'show');
+        elements.resultCard.classList.add(ok ? 'ok' : 'bad', 'show');
+        
+        if (ok) {
+          const H = STATE.headers;
+          const get = name => rec[H.indexOf(name)] || '';
+          document.getElementById('v_full_name').textContent = get('full_name');
+          document.getElementById('v_badge_uid').textContent = get('badge_uid');
+          document.getElementById('v_category').textContent = get('category');
+          document.getElementById('v_institution').textContent = get('institution');
+          document.getElementById('v_email').textContent = get('email');
+          document.getElementById('v_phone').textContent = get('phone');
+          document.getElementById('v_meal').textContent = get('meal_entitled(yes/no)');
+          document.getElementById('v_kit').textContent = get('kit_entitled(yes/no)');
+          document.getElementById('v_tpl').textContent = get('badge_print_template');
+          document.getElementById('v_notes').textContent = get('notes');
+        } else {
+          ['v_full_name', 'v_badge_uid', 'v_category', 'v_institution', 'v_email', 'v_phone', 'v_meal', 'v_kit', 'v_tpl'].forEach(id => {
+            document.getElementById(id).textContent = '';
+          });
+          document.getElementById('v_notes').textContent = 'No match found';
+        }
+      },
+
+      addRecent(uid, name, ok) {
+        const div = document.createElement('div');
+        div.className = 'recent-item fade-in';
+        const left = document.createElement('div');
+        left.className = 'recent-uid';
+        left.textContent = uid || '(empty)';
+        const right = document.createElement('div');
+        right.className = `recent-name ${ok ? 'found' : 'not-found'}`;
+        right.textContent = ok ? (name || '') : 'Not found';
+        div.append(left, right);
+        elements.recentList.prepend(div);
+        while (elements.recentList.childElementCount > 30) {
+          elements.recentList.removeChild(elements.recentList.lastChild);
+        }
+      },
+
+      onEnter(code) {
+        const t0 = performance.now();
+        const uid = (code || '').trim();
+        if (!uid) return;
+        
+        STATE.total++;
+        const rec = STATE.indexByUid.get(uid);
+        const ok = !!rec; if (ok) STATE.hits++;
+        
+        const ms = Math.max(0, Math.round(performance.now() - t0));
+        elements.kpiMs.textContent = ms;
+        STATE.lastLookupTime = ms;
+        
+        const rate = STATE.total ? Math.round(100 * STATE.hits / STATE.total) : 0;
+        elements.kpiHit.textContent = rate + '%';
+        
+        lookupSystem.showResult(ok, rec);
+        lookupSystem.addRecent(uid, ok ? rec[STATE.headers.indexOf('full_name')] : '', ok);
+        utils.beep(ok);
+        
+        if (ok) {
+          elements.resultCard.classList.add('success-animation');
+          setTimeout(() => elements.resultCard.classList.remove('success-animation'), 600);
+        } else {
+          elements.resultCard.classList.add('error-animation');
+          setTimeout(() => elements.resultCard.classList.remove('error-animation'), 600);
+        }
+        
+        elements.scannerInput.select();
+      }
+    };
+
+    // Registration System
+    const registrationSystem = {
+      handleCreateBadge() {
+        const fields = {
+          full_name: document.getElementById('nr_full_name').value.trim(),
+          email: document.getElementById('nr_email').value.trim(),
+          badge_uid: document.getElementById('nr_badge_uid').value.trim(),
+          category: document.getElementById('nr_category').value.trim(),
+          institution: document.getElementById('nr_institution').value.trim(),
+          phone: document.getElementById('nr_phone').value.trim(),
+          meal: document.getElementById('nr_meal').checked,
+          kit: document.getElementById('nr_kit').checked,
+          tpl: document.getElementById('nr_tpl').value.trim() || 'TPL_A6_V1'
+        };
+
+        if (!fields.badge_uid || !fields.full_name) {
+          utils.showNotification('Badge UID and Full name are required', 'error');
+        return;
+      }
+        
+        if (STATE.indexByUid.has(fields.badge_uid)) {
+          if (!confirm('This badge_uid already exists. Replace?')) return;
+      }
+
+      const rowObj = {
+        'event_code': 'EVENT',
+          'badge_uid': fields.badge_uid,
+          'full_name': fields.full_name,
+          'email': fields.email,
+          'category': fields.category,
+          'meal_entitled(yes/no)': utils.toYesNo(fields.meal),
+          'kit_entitled(yes/no)': utils.toYesNo(fields.kit),
+          'institution': fields.institution,
+          'phone': fields.phone,
+          'badge_print_template': fields.tpl,
+        'notes': 'new-registration'
+      };
+
+        dataManager.upsertLocalIndex(rowObj);
+        dataManager.appendNewRegistration(rowObj);
+        printSystem.printBadge(rowObj);
+
+        // Clear form
+        ['nr_full_name', 'nr_email', 'nr_badge_uid', 'nr_institution', 'nr_phone'].forEach(id => {
+          document.getElementById(id).value = '';
+        });
+      document.getElementById('nr_meal').checked = false;
+      document.getElementById('nr_kit').checked = false;
+        
+        utils.showNotification('Badge created and printed successfully!', 'success');
+        elements.scannerInput.focus();
+      }
+    };
+
+    // Print System
+    const printSystem = {
+      printBadge(rowObj) {
+        document.getElementById('pb_name').textContent = rowObj['full_name'] || '';
+        document.getElementById('pb_cat').textContent = (rowObj['category'] || '').toUpperCase();
+        document.getElementById('pb_inst').textContent = rowObj['institution'] || '';
+        document.getElementById('pb_uid').textContent = `ID: ${rowObj['badge_uid'] || ''}`;
+        document.getElementById('pb_qr_label').textContent = rowObj['badge_uid'] || '';
+        document.getElementById('pb_meal').textContent = rowObj['meal_entitled(yes/no)'] || 'no';
+        document.getElementById('pb_kit').textContent = rowObj['kit_entitled(yes/no)'] || 'no';
+        
+        // Set category badge color based on category
+        const categoryBadge = document.getElementById('pb_cat');
+        const category = (rowObj['category'] || '').toLowerCase();
+        categoryBadge.className = '';
+        categoryBadge.style.background = '';
+        
+        if (category === 'faculty') {
+          categoryBadge.style.background = 'linear-gradient(135deg, #3498db, #2980b9)';
+        } else if (category === 'exhibitor') {
+          categoryBadge.style.background = 'linear-gradient(135deg, #f39c12, #e67e22)';
+        } else if (category === 'staff') {
+          categoryBadge.style.background = 'linear-gradient(135deg, #9b59b6, #8e44ad)';
+        } else if (category === 'chairperson') {
+          categoryBadge.style.background = 'linear-gradient(135deg, #1abc9c, #16a085)';
+      } else {
+          categoryBadge.style.background = 'linear-gradient(135deg, #e74c3c, #c0392b)';
+        }
+        
+        setTimeout(() => window.print(), 50);
+      },
+
+      async setupQzTray() {
+        try {
+          if (window.qz && qz.websocket) {
+            await qz.websocket.connect();
+            STATE.isPrinterConnected = true;
+            elements.printerLine.classList.add('ok');
+            elements.qzStatus.textContent = 'QZ Tray Connected';
+            utils.showNotification('QZ Tray connected successfully', 'success');
+            
+            const printers = await qz.printers.find();
+            elements.printerSelect.innerHTML = '';
+            printers.forEach(printer => {
+              const option = document.createElement('option');
+              option.value = printer;
+              option.textContent = printer;
+              elements.printerSelect.appendChild(option);
+            });
+          }
+        } catch (e) {
+          console.warn('QZ Tray setup failed:', e);
+          elements.qzStatus.textContent = 'QZ Tray not available';
+        }
+      },
+
+      async printWithQz(data) {
+        try {
+          if (window.qz && qz.websocket && qz.websocket.isActive()) {
+            const printers = await qz.printers.find();
+            const name = printers && printers[0];
+            if (!name) throw new Error('No printers found');
+            
+            const zpl = (window.ZplTemplates && ZplTemplates.generateZplA6) ? 
+                       ZplTemplates.generateZplA6(data) : '';
+            const cfg = qz.configs.create(name, { rasterize: false, encoding: 'utf8' });
+            await qz.print(cfg, [{ type: 'raw', format: 'command', data: zpl }]);
+            utils.showNotification('Badge printed via QZ Tray', 'success');
+            return true;
+          }
+        } catch (e) {
+          console.warn('QZ print failed:', e);
+          return false;
+        }
+        return false;
+      }
+    };
+
+    // Event Handlers
+    const eventHandlers = {
+      init() {
+        // Scanner input
+        elements.scannerInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+        e.preventDefault();
+            lookupSystem.onEnter(elements.scannerInput.value);
+            elements.scannerInput.value = '';
+          }
+        });
+
+        // Manual input - auto-trigger on valid input
+        elements.armedScanInput.addEventListener('input', (e) => {
+          const code = e.target.value.trim();
+          if (code && code.length >= 3) { // Minimum 3 characters to avoid false triggers
+            const rec = STATE.indexByUid.get(code);
+            if (rec) {
+              // Valid badge found - auto-trigger print
+              lookupSystem.onEnter(code);
+              e.target.value = '';
+              // Auto-focus scanner for next scan
+              setTimeout(() => elements.scannerInput.focus(), 100);
+            }
+          }
+        });
+
+        // Keep Enter key as backup
+        elements.armedScanInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            lookupSystem.onEnter(elements.armedScanInput.value);
+            elements.armedScanInput.value = '';
+          }
+        });
+
+        // File upload
+        elements.fileInput.addEventListener('change', async (e) => {
+      const f = e.target.files && e.target.files[0];
+          if (!f) return;
+      const text = await f.text();
+          dataManager.onCsvLoaded(text);
+        });
+
+        // Drag and drop
+        elements.uploadArea.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          elements.uploadArea.classList.add('dragover');
+        });
+
+        elements.uploadArea.addEventListener('dragleave', () => {
+          elements.uploadArea.classList.remove('dragover');
+        });
+
+        elements.uploadArea.addEventListener('drop', async (e) => {
+          e.preventDefault();
+          elements.uploadArea.classList.remove('dragover');
+          const files = e.dataTransfer.files;
+          if (files.length > 0 && files[0].type === 'text/csv') {
+            const text = await files[0].text();
+            dataManager.onCsvLoaded(text);
+          }
+        });
+
+        elements.uploadArea.addEventListener('click', () => {
+          elements.fileInput.click();
+        });
+
+        // Print buttons
+        document.getElementById('btnPrintExisting').addEventListener('click', async () => {
+          const uid = document.getElementById('v_badge_uid').textContent.trim();
+          if (!uid) {
+            utils.showNotification('No attendee selected', 'error');
+            return;
+          }
+          
+      const rec = STATE.indexByUid.get(uid);
+          if (!rec) {
+            utils.showNotification('Record not found in index', 'error');
+            return;
+          }
+          
+          const H = STATE.headers;
+          const get = n => rec[H.indexOf(n)] || '';
+      const data = {
+        'full_name': get('full_name'),
+        'category': get('category'),
+        'institution': get('institution'),
+        'badge_uid': get('badge_uid')
+      };
+
+          const qzSuccess = await printSystem.printWithQz(data);
+          if (!qzSuccess) {
+            printSystem.printBadge(data);
+          }
+        });
+
+        document.getElementById('btnCreateBadge').addEventListener('click', () => {
+          registrationSystem.handleCreateBadge();
+        });
+
+        document.getElementById('btnQzConnect').addEventListener('click', () => {
+          printSystem.setupQzTray();
+        });
+
+        // Auto-focus management
+        window.addEventListener('click', (e) => {
+          const t = e.target;
+          const isInput = t && (t.tagName === 'INPUT' || t.closest('input'));
+          if (!isInput) elements.scannerInput.focus();
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+          if (e.ctrlKey && e.key === 'f') {
+            e.preventDefault();
+            elements.scannerInput.focus();
+          }
+        });
+      }
+    };
+
+    // Initialize
+    window.addEventListener('load', () => {
+      eventHandlers.init();
+      elements.scannerInput.focus();
+      dataManager.tryFetchDefault();
+      printSystem.setupQzTray();
+    });
+  </script>
+</body>
+</html>
+
+
